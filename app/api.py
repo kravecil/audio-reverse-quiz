@@ -4,7 +4,7 @@ from functools import reduce
 import httpx
 from fastapi import APIRouter
 
-from src.parsing import get_track_list, get_results
+from app.parsing import get_results
 
 api = APIRouter()
 
