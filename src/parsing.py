@@ -1,20 +1,15 @@
-import asyncio
-import re
-from functools import reduce
-
-import httpx
 from bs4 import BeautifulSoup
-from fastapi import FastAPI
+import re
 
-app = FastAPI()
-
-SOURCE_HOST_URL = r"https://rus.hitmotop.com"
 REGEXP_LAST_START_FROM = r"\/search\/start\/(?P<last_start_from>\d+)\?q=(?P<q>.+)"
 LINK_PATTERN = "/search/start/{last_start_from}?q={q}"
 PER_PAGE_SIZE = 48
 
 
-def get_track_list(soup: BeautifulSoup):
+def get_track_list(soup: str | BeautifulSoup):
+    if not isinstance(soup, BeautifulSoup):
+        soup = BeautifulSoup(soup, features="html.parser")
+
     tracks = []
 
     track_tags = soup.find(class_="tracks__list").find_all(class_="track__info")
@@ -37,14 +32,6 @@ def get_track_list(soup: BeautifulSoup):
         )
 
     return tracks
-
-
-def generate_links_by_last_page(last_start_from: int, q: str):
-    links = [
-        LINK_PATTERN.format(last_start_from=r, q=q)
-        for r in range(PER_PAGE_SIZE, last_start_from + PER_PAGE_SIZE, PER_PAGE_SIZE)
-    ]
-    return links
 
 
 def get_pagination_links(soup: BeautifulSoup):
@@ -73,37 +60,18 @@ def get_pagination_links(soup: BeautifulSoup):
     return links
 
 
-def parse_result(text: str):
+def get_results(text: str, with_links=False):
     soup = BeautifulSoup(text, features="html.parser")
 
     tracks = get_track_list(soup)
-    links = get_pagination_links(soup)
+    links = get_pagination_links(soup) if with_links else None
 
     return tracks, links
 
 
-async def get_web(url: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-
-    return response.text
-
-
-async def get_results(url: str):
-    html = await get_web(url)
-    tracks, links = parse_result(html)
-
-    return tracks, links
-
-
-@app.get("/api/get-tracks")
-async def get_tracks(q: str):
-    tracks, links = await get_results(f"{SOURCE_HOST_URL}/search?q={q}")
-
-    tasks = [
-        asyncio.create_task(get_results(f"{SOURCE_HOST_URL}{link}")) for link in links
+def generate_links_by_last_page(last_start_from: int, q: str):
+    links = [
+        LINK_PATTERN.format(last_start_from=r, q=q)
+        for r in range(PER_PAGE_SIZE, last_start_from + PER_PAGE_SIZE, PER_PAGE_SIZE)
     ]
-    results = await asyncio.gather(*tasks)
-    tracks.extend(reduce(lambda sum, val: sum + val[0], results, []))
-
-    return tracks
+    return links
