@@ -1,4 +1,4 @@
-from src.api import api
+from app.api import api
 
 from fastapi import FastAPI
 
