@@ -12,7 +12,11 @@ def get_track_list(soup: str | BeautifulSoup):
 
     tracks = []
 
-    track_tags = soup.find(class_="tracks__list").find_all(class_="track__info")
+    track_list = soup.find(class_="tracks__list")
+    if track_list is None:
+        return tracks
+
+    track_tags = track_list.find_all(class_="track__info")
     if track_tags is None:
         return tracks
 
