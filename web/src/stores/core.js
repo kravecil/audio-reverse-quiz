@@ -6,18 +6,20 @@ import { Loading } from "quasar";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const useCoreStore = defineStore("core", () => {
-  const tracks = ref([]);
+  const tracks = ref();
+  const currentTrack = ref();
 
   const searchString = ref("");
 
   const fetchTracks = async () => {
+    if (!searchString.value.length) return;
+
     Loading.show({ message: "Идёт поиск..." });
     try {
       const response = await axios.get(`${BASE_URL}/api/get-tracks`, {
         params: { q: searchString.value },
       });
       tracks.value = response.data;
-      console.log(tracks.value);
     } catch (error) {
       console.error(error);
     } finally {
@@ -27,6 +29,7 @@ export const useCoreStore = defineStore("core", () => {
 
   return {
     tracks,
+    currentTrack,
     searchString,
     fetchTracks,
   };

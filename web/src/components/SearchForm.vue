@@ -6,6 +6,6 @@ const core = useCoreStore();
 
 <template>
   <q-form @submit="core.fetchTracks()">
-    <q-input label="Поиск" dark outlined v-model="core.searchString" />
+    <q-input label="Поиск" dark outlined v-model="core.searchString" dense />
   </q-form>
 </template>

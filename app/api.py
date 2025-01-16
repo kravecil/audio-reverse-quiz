@@ -40,3 +40,6 @@ async def get_tracks(q: str):
     tracks.extend(reduce(lambda sum, val: sum + val[0], results, []))
 
     return tracks
+
+@api.get("/api/play-track")
+async def play_track(url: str):
