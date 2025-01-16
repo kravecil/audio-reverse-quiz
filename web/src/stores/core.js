@@ -4,6 +4,7 @@ import axios from "axios";
 import { Loading } from "quasar";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
+const REAL_BASE_URL = "https://s3.deliciouspeaches.com";
 
 export const useCoreStore = defineStore("core", () => {
   const tracks = ref();

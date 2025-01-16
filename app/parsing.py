@@ -1,9 +1,20 @@
-from bs4 import BeautifulSoup
 import re
+from urllib.parse import urlparse, urlunparse
+
+from bs4 import BeautifulSoup
 
 REGEXP_LAST_START_FROM = r"\/search\/start\/(?P<last_start_from>\d+)\?q=(?P<q>.+)"
 LINK_PATTERN = "/search/start/{last_start_from}?q={q}"
 PER_PAGE_SIZE = 48
+
+REAL_HOST = "s3.deliciouspeaches.com"
+
+
+def change_baseurl(url, base_url):
+    parsed_url = list(urlparse(url))
+    parsed_url[1] = REAL_HOST
+
+    return urlunparse(parsed_url)
 
 
 def get_track_list(soup: str | BeautifulSoup):
@@ -25,7 +36,9 @@ def get_track_list(soup: str | BeautifulSoup):
 
         title: str = track_info.find(class_="track__title").string
         desc: str = track_info.find(class_="track__desc").string
-        filepath: str = track_tag.find(class_="track__download-btn").attrs.get("href")
+        filepath: str = change_baseurl(
+            track_tag.find(class_="track__download-btn").attrs.get("href"), REAL_HOST
+        )
 
         tracks.append(
             {

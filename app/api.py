@@ -41,5 +41,5 @@ async def get_tracks(q: str):
 
     return tracks
 
-@api.get("/api/play-track")
-async def play_track(url: str):
+# @api.get("/api/play-track")
+# async def play_track(url: str):
