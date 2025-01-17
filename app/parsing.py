@@ -36,9 +36,10 @@ def get_track_list(soup: str | BeautifulSoup):
 
         title: str = track_info.find(class_="track__title").string
         desc: str = track_info.find(class_="track__desc").string
-        filepath: str = change_baseurl(
-            track_tag.find(class_="track__download-btn").attrs.get("href"), REAL_HOST
-        )
+        # filepath: str = change_baseurl(
+        #     track_tag.find(class_="track__download-btn").attrs.get("href"), REAL_HOST
+        # )
+        filepath: str = track_tag.find(class_="track__download-btn").attrs.get("href")
 
         tracks.append(
             {
