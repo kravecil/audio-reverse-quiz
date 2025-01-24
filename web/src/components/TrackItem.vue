@@ -6,8 +6,8 @@ const core = useCoreStore();
 defineProps(["info"]);
 
 const onClick = (info) => {
-  core.currentTrack = info;
-  console.log(core.currentTrack);
+  core.setCurrentTrack(info);
+  // console.log(core.currentTrack); ////
 };
 </script>
 

@@ -1,19 +1,16 @@
 <script setup>
-import { onMounted, useTemplateRef, computed } from "vue";
+import { useTemplateRef } from "vue";
 import { useCoreStore } from "../stores/core";
 
 const core = useCoreStore();
 
-const audioPlayer = useTemplateRef("audioPlayer");
-onMounted(() => {
-  audioPlayer.value.playbackRate = -1.0;
-});
+core.audioPlayerRef = useTemplateRef("audioPlayer");
 </script>
 
 <template>
   <q-footer class="bg-grey-9">
-    <audio controls ref="audioPlayer" v-if="core.currentTrack!==undefined">
-      <source :src="core.currentTrack.filepath" />
+    <audio controls ref="audioPlayer" v-if="core.currentTrack !== undefined">
+      <source :src="core.currentTrack.storageFile" />
       Not supported
     </audio>
   </q-footer>

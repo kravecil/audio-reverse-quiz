@@ -1,8 +1,11 @@
 import asyncio
+import tempfile
 from functools import reduce
+import os
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, status
+from fastapi.exceptions import HTTPException
 
 from app.parsing import get_results
 
@@ -10,9 +13,12 @@ api = APIRouter()
 
 SOURCE_HOST_URL = r"https://rus.hitmotop.com"
 
+# STORAGE_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/../storage"
+STORAGE_PATH = "storage"
+
 
 async def get_html(url: str):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30) as client:
         response = await client.get(url)
 
     return response.text
@@ -41,5 +47,21 @@ async def get_tracks(q: str):
 
     return tracks
 
-# @api.get("/api/play-track")
-# async def play_track(url: str):
+
+@api.get("/api/get-track")
+def get_track(url: str):
+    response = httpx.get(url, follow_redirects=True)
+
+    if response.status_code != status.HTTP_200_OK:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ошибка при получении медафайла:\n{response.text}",
+        )
+
+    with tempfile.NamedTemporaryFile(
+        mode="wb", delete=False, delete_on_close=False, dir=STORAGE_PATH
+    ) as f:
+        f.write(response.content)
+        filepath = os.path.basename(f.name)
+
+    return filepath
