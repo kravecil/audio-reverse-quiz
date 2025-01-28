@@ -1,7 +1,9 @@
 import axios from "axios";
 import { defineStore } from "pinia";
 import { Loading, Notify } from "quasar";
-import { ref, useTemplateRef } from "vue";
+import { ref, toRef } from "vue";
+
+import { loadUrl } from "./player";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -12,8 +14,6 @@ export const useCoreStore = defineStore("core", () => {
   const currentTrack = ref();
 
   const searchString = ref("");
-
-  const audioPlayerRef = useTemplateRef(null);
 
   const fetchTracks = async () => {
     if (!searchString.value.length) return;
@@ -32,37 +32,22 @@ export const useCoreStore = defineStore("core", () => {
     }
   };
 
-  const fetchTrack = async (url) => {
+  const setCurrentTrack = async (info) => {
     Loading.show({ message: "Загружаем трек..." });
+    currentTrack.value = info;
     try {
-      const response = await api.get("/api/get-track", { params: { url } });
-      // console.log(response.data);
-      return response.data;
+      await loadUrl(`${BASE_URL}/api/get-track?url=${info.filepath}`);
     } catch (error) {
-      Notify.create({ message: "Ошибка при загрузке трека" });
       console.error(error);
     } finally {
       Loading.hide();
     }
   };
 
-  const setCurrentTrack = async (info) => {
-    currentTrack.value = info;
-    const storageFile = await fetchTrack(info.filepath);
-    currentTrack.value.storageFile = `${BASE_URL}/storage/${storageFile}`;
-
-    // audioPlayerRef.value.src = currentTrack.value.storageFile;
-    // audioPlayerRef.value.playbackRate = -1
-    const audio = new Audio(currentTrack.value.storageFile);
-    // audio.playbackRate = -1;
-    audio.play();
-  };
-
   return {
     tracks,
     currentTrack,
     searchString,
-    audioPlayerRef,
     fetchTracks,
     setCurrentTrack,
   };

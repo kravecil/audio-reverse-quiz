@@ -1,11 +1,9 @@
 import asyncio
-import tempfile
 from functools import reduce
-import os
 
 import httpx
-from fastapi import APIRouter, status
-from fastapi.exceptions import HTTPException
+from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 
 from app.parsing import get_results
 
@@ -50,18 +48,8 @@ async def get_tracks(q: str):
 
 @api.get("/api/get-track")
 def get_track(url: str):
-    response = httpx.get(url, follow_redirects=True)
+    def get_stream():
+        with httpx.stream("GET", url, follow_redirects=True) as stream:
+            yield from stream.iter_bytes()
 
-    if response.status_code != status.HTTP_200_OK:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Ошибка при получении медафайла:\n{response.text}",
-        )
-
-    with tempfile.NamedTemporaryFile(
-        mode="wb", delete=False, delete_on_close=False, dir=STORAGE_PATH
-    ) as f:
-        f.write(response.content)
-        filepath = os.path.basename(f.name)
-
-    return filepath
+    return StreamingResponse(get_stream())
