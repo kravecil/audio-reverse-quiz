@@ -1,6 +1,5 @@
 <script setup>
 import { useCoreStore } from "../stores/core";
-import { playAudio, pauseAudio, stopAudio } from "../stores/player";
 import { ref } from "vue";
 import { player } from "../stores/player";
 
@@ -9,18 +8,26 @@ const ICON_PAUSE = "pause";
 
 const core = useCoreStore();
 
+const playedTime = ref(0);
+
+player.onStateChanged(() => {
+  if (player.getState() == "started") playIcon.value = ICON_PAUSE;
+  else playIcon.value = ICON_PLAY;
+
+  console.log("State changed: ", player.getState())
+});
+
 const onPlay = () => {
-  if ([player.state] == "stopped") {
-    playAudio();
-    playIcon.value = ICON_PAUSE;
+  console.log("onPlay", player.getState());
+  if (player.getState() == "stopped") {
+    player.playAudio();
   } else {
-    pauseAudio();
-    playIcon.value = ICON_PLAY;
+    player.pauseAudio();
   }
 };
 const onStop = () => {
-  stopAudio();
-  playIcon.value = ICON_PLAY;
+  console.log("onStop", player.getState());
+  player.stopAudio();
 };
 
 const playIcon = ref(ICON_PLAY);
@@ -29,7 +36,7 @@ const playIcon = ref(ICON_PLAY);
 <template>
   <q-footer class="bg-grey-9 q-pa-sm" v-if="core.currentTrack !== undefined">
     <q-toolbar
-      >1{{ core.playerState }}2
+      >1{{ core.currentTrack.duration }}2
       <q-item>
         <q-item-section class="text-white">
           <q-item-label class="text-grey-5">
@@ -41,7 +48,7 @@ const playIcon = ref(ICON_PLAY);
         </q-item-section>
       </q-item>
 
-      <q-space />
+      <q-slider v-model="playedTime" :min="0" :max="10" />
 
       <q-btn :icon="playIcon" rounded dense flat @click="onPlay" />
       <q-btn icon="stop" rounded dense flat @click="onStop" />

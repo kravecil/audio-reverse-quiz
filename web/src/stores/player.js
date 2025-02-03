@@ -1,34 +1,49 @@
-import { Player, getTransport, start } from "tone";
+import { Player, getTransport } from "tone";
+import { ref } from "vue";
 
-const transport = getTransport();
+const usePlayer = () => {
+  const tonePlayer = new Player().toDestination();
+  tonePlayer.sync().start(0);
+  tonePlayer.reverse = true;
 
-export const player = new Player().toDestination();
-player.sync().start(0);
-player.reverse = true;
-// player.restart();
+  const transport = getTransport();
 
-export const loadUrl = async (url) => {
-  console.log("Loading URL...");
-  await player.load(url);
-  console.log("URL loaded!");
+  const title = ref("");
+  const desc = ref("");
+
+  async function loadUrl(url) {
+    console.log("Loading URL...");
+    return await tonePlayer.load(url);
+  }
+
+  const playAudio = () => {
+    console.log("Starting player...");
+    transport.start();
+  };
+
+  const pauseAudio = () => {
+    console.log("Player pausing...");
+    transport.pause();
+  };
+
+  const stopAudio = () => {
+    console.log("Player stopping...");
+    transport.stop();
+  };
+
+  const onStateChanged = (callback) =>
+    transport.on("statechange", callback);
+
+  const getState = () => transport.state;
+
+  return {
+    loadUrl,
+    playAudio,
+    pauseAudio,
+    stopAudio,
+    onStateChanged,
+    getState,
+  };
 };
 
-export const playAudio = () => {
-  console.log("Starting player...");
-  // player.reverse = true;
-  // player.autostart = true;
-  // player.start();
-  transport.start();
-};
-
-export const pauseAudio = () => {
-  console.log("Player pausing...");
-  // player.stop(player);
-  transport.pause();
-};
-
-export const stopAudio = () => {
-  console.log("Player stopping...");
-  // player.stop(0);
-  transport.stop();
-};
+export const player = usePlayer();

@@ -1,9 +1,9 @@
 import axios from "axios";
 import { defineStore } from "pinia";
 import { Loading, Notify } from "quasar";
-import { ref, toRef } from "vue";
+import { ref } from "vue";
 
-import { loadUrl } from "./player";
+import { player } from "./player";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -36,7 +36,9 @@ export const useCoreStore = defineStore("core", () => {
     Loading.show({ message: "Загружаем трек..." });
     currentTrack.value = info;
     try {
-      await loadUrl(`${BASE_URL}/api/get-track?url=${info.filepath}`);
+      currentTrack.value.duration = (
+        await player.loadUrl(`${BASE_URL}/api/get-track?url=${info.filepath}`)
+      ).buffer.duration;
     } catch (error) {
       console.error(error);
     } finally {
