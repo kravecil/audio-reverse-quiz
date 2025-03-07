@@ -6,13 +6,9 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from app.parsing import get_results
+from app.settings import SOURCE_HOST_URL
 
 api = APIRouter()
-
-SOURCE_HOST_URL = r"https://rus.hitmotop.com"
-
-# STORAGE_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/../storage"
-STORAGE_PATH = "storage"
 
 
 async def get_html(url: str):

@@ -3,11 +3,11 @@ from urllib.parse import urlparse, urlunparse
 
 from bs4 import BeautifulSoup
 
+from app.settings import REAL_HOST
+
 REGEXP_LAST_START_FROM = r"\/search\/start\/(?P<last_start_from>\d+)\?q=(?P<q>.+)"
 LINK_PATTERN = "/search/start/{last_start_from}?q={q}"
 PER_PAGE_SIZE = 48
-
-REAL_HOST = "s3.deliciouspeaches.com"
 
 
 def change_baseurl(url, base_url):
